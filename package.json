@@ -17,7 +17,7 @@
   "devDependencies": {
     "mocha": "2.3.x"
   },
-  "homepage": "https://github.com/stendahls/cert-downloader",
+  "homepage": "https://github.com/liuxiaoxinxin/cert-downloader",
   "keywords": [
     "apple",
     "cer",
@@ -31,10 +31,10 @@
   "name": "cert-downloader",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/stendahls/cert-downloader.git"
+    "url": "git+https://github.com/liuxiaoxinxin/cert-downloader.git"
   },
   "scripts": {
     "test": "mocha"
   },
-  "version": "1.0.1"
+  "version": "1.0.0"
 }
