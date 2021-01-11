@@ -20,8 +20,7 @@ THE SOFTWARE.
 Inspired by Silas Knobel <dev@katun.ch>
 */
 
-'use strict';
-
+"use strict";
 
 /**
  * CertDownloader([options]).
@@ -36,11 +35,11 @@ Inspired by Silas Knobel <dev@katun.ch>
  *             by default this is the operating system's default directory for temp files)
  */
 function CertDownloader(options) {
-    this.fs = require('fs');
-    this.util = require('util');
-    this.certName = 'AppleIncRootCertificate.cer';
-    this.rootUrl = 'http://www.apple.com/appleca/AppleIncRootCertificate.cer';
-    this.cachePath = require('os').tmpdir();
+    this.fs = require("fs");
+    this.util = require("util");
+    this.certName = "AppleIncRootCertificate.cer";
+    this.rootUrl = "https://www.apple.com/appleca/AppleIncRootCertificate.cer";
+    this.cachePath = require("os").tmpdir();
     if (options) {
         if (options.certName) {
             this.certName = options.certName;
@@ -64,21 +63,23 @@ function CertDownloader(options) {
  */
 CertDownloader.prototype.cert = function (callback) {
     var _this = this;
-    var certPath = require('path').join(_this.cachePath, _this.certName);
+    var certPath = require("path").join(_this.cachePath, _this.certName);
     if (_this.fs.existsSync(certPath)) {
         callback(null, certPath);
     } else {
-        require('http').get(_this.rootUrl, function (res) {
-            var downloadStream = _this.fs.createWriteStream(certPath);
-            res.pipe(downloadStream);
-            return downloadStream.on('finish', function () {
-                return downloadStream.close(function () {
-                    return callback(null, certPath);
+        require("https")
+            .get(_this.rootUrl, function (res) {
+                var downloadStream = _this.fs.createWriteStream(certPath);
+                res.pipe(downloadStream);
+                return downloadStream.on("finish", function () {
+                    return downloadStream.close(function () {
+                        return callback(null, certPath);
+                    });
                 });
+            })
+            .on("error", function (error) {
+                callback(error);
             });
-        }).on('error', function (error) {
-            callback(error);
-        });
     }
 };
 
@@ -92,7 +93,7 @@ CertDownloader.prototype.cert = function (callback) {
  */
 CertDownloader.prototype.pem = function (callback) {
     var _this = this;
-    var pemPath = require('path').join(_this.cachePath, _this.util.format('%s.pem', _this.certName.split('.')[0]));
+    var pemPath = require("path").join(_this.cachePath, _this.util.format("%s.pem", _this.certName.split(".")[0]));
     if (_this.fs.existsSync(pemPath)) {
         callback(null, pemPath);
     } else {
@@ -100,12 +101,9 @@ CertDownloader.prototype.pem = function (callback) {
             if (error) {
                 callback(error);
             } else {
-                var exec = require('child_process').exec;
-                var execOptions = {cwd: _this.cachePath};
-                var cmd = _this.util.format(
-                    'openssl x509 -inform der -in "%s" -out "%s"',
-                    certPath,
-                    pemPath);
+                var exec = require("child_process").exec;
+                var execOptions = { cwd: _this.cachePath };
+                var cmd = _this.util.format('openssl x509 -inform der -in "%s" -out "%s"', certPath, pemPath);
                 return exec(cmd, execOptions, function (error) {
                     if (error) {
                         return callback(error);
@@ -132,12 +130,9 @@ CertDownloader.prototype.verify = function (file, callback) {
         if (error) {
             return callback(error);
         }
-        var exec = require('child_process').exec;
-        var execOptions = {cwd: _this.cachePath};
-        var cmd = _this.util.format(
-            'openssl smime -in "%s" -inform der -verify -CAfile "%s"',
-            file,
-            pemPath);
+        var exec = require("child_process").exec;
+        var execOptions = { cwd: _this.cachePath };
+        var cmd = _this.util.format('openssl smime -in "%s" -inform der -verify -CAfile "%s"', file, pemPath);
         exec(cmd, execOptions, function (error, output) {
             if (error) {
                 return callback(error);
